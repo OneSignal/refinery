@@ -76,8 +76,13 @@ type Config interface {
 	// duration.
 	GetTraceTimeout() (time.Duration, error)
 
-	// GetMaxBatchSize is the number of events to be included in the batch for sending
-	GetMaxBatchSize() uint
+	// GetUpstreamMaxBatchSize is the number of events to be included in the
+	// batch for sending upstream
+	GetUpstreamMaxBatchSize() uint
+
+	// GetPeerMaxBatchSize is the number of events to be included in the batch
+	// for sending between refinery peers
+	GetPeerMaxBatchSize() uint
 
 	// GetOtherConfig attempts to fill the passed in struct with the contents of
 	// a subsection of the config.   This is used by optional configurations to
