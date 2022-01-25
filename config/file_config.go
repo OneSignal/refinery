@@ -38,7 +38,8 @@ type configContents struct {
 	Metrics                   string        `validate:"required,oneof= prometheus honeycomb"`
 	SendDelay                 time.Duration `validate:"required"`
 	TraceTimeout              time.Duration `validate:"required"`
-	MaxBatchSize              uint          `validate:"required"`
+	UpstreamMaxBatchSize      uint          `validate:"required"`
+	PeerMaxBatchSize          uint          `validate:"required"`
 	SendTicker                time.Duration `validate:"required"`
 	UpstreamBufferSize        int           `validate:"required"`
 	PeerBufferSize            int           `validate:"required"`
@@ -114,7 +115,8 @@ func NewConfig(config, rules string, errorCallback func(error)) (Config, error) 
 	c.SetDefault("Metrics", "honeycomb")
 	c.SetDefault("SendDelay", 2*time.Second)
 	c.SetDefault("TraceTimeout", 60*time.Second)
-	c.SetDefault("MaxBatchSize", 500)
+	c.SetDefault("UpstreamMaxBatchSize", 500)
+	c.SetDefault("PeerMaxBatchSize", 500)
 	c.SetDefault("SendTicker", 100*time.Millisecond)
 	c.SetDefault("UpstreamBufferSize", libhoney.DefaultPendingWorkCapacity)
 	c.SetDefault("PeerBufferSize", libhoney.DefaultPendingWorkCapacity)
@@ -646,11 +648,18 @@ func (f *fileConfig) GetTraceTimeout() (time.Duration, error) {
 	return f.conf.TraceTimeout, nil
 }
 
-func (f *fileConfig) GetMaxBatchSize() uint {
+func (f *fileConfig) GetUpstreamMaxBatchSize() uint {
 	f.mux.RLock()
 	defer f.mux.RUnlock()
 
-	return f.conf.MaxBatchSize
+	return f.conf.UpstreamMaxBatchSize
+}
+
+func (f *fileConfig) GetPeerMaxBatchSize() uint {
+	f.mux.RLock()
+	defer f.mux.RUnlock()
+
+	return f.conf.PeerMaxBatchSize
 }
 
 func (f *fileConfig) GetOtherConfig(name string, iface interface{}) error {

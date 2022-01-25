@@ -105,7 +105,8 @@ func newStartedApp(
 	c := &config.MockConfig{
 		GetSendDelayVal:                      0,
 		GetTraceTimeoutVal:                   10 * time.Millisecond,
-		GetMaxBatchSizeVal:                   500,
+		GetUpstreamMaxBatchSizeVal:           500,
+		GetPeerMaxBatchSizeVal:               500,
 		GetSamplerTypeVal:                    &config.DeterministicSamplerConfig{SampleRate: 1},
 		SendTickerVal:                        2 * time.Millisecond,
 		PeerManagementType:                   "file",
@@ -161,7 +162,7 @@ func newStartedApp(
 	sdPeer, _ := statsd.New(statsd.Prefix("refinery.peer"))
 	peerClient, err := libhoney.NewClient(libhoney.ClientConfig{
 		Transmission: &transmission.Honeycomb{
-			MaxBatchSize:         c.GetMaxBatchSize(),
+			MaxBatchSize:         c.GetUpstreamMaxBatchSize(),
 			BatchTimeout:         libhoney.DefaultBatchTimeout,
 			MaxConcurrentBatches: libhoney.DefaultMaxConcurrentBatches,
 			PendingWorkCapacity:  uint(c.GetPeerBufferSize()),
