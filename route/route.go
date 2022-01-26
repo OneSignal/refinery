@@ -399,12 +399,12 @@ func (r *Router) processEvent(ev *types.Event, reqID interface{}) error {
 	var err error
 
 	jsonString, err := json.Marshal(ev.Data)
-	if err != nil {
+	if err == nil {
 		dataSizeBytes := len(jsonString)
 		// Log some data about large events so that we can diagnose where they
 		// are coming from.
 		if dataSizeBytes > 50000 {
-			log := r.iopLogger.Info()
+			log := r.iopLogger.Error()
 			var serviceName string
 			var spanName string
 
