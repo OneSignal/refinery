@@ -396,6 +396,29 @@ func (r *Router) processEvent(ev *types.Event, reqID interface{}) error {
 		WithField("request_id", reqID).
 		WithString("api_host", ev.APIHost).
 		WithString("dataset", ev.Dataset)
+	var err error
+
+	jsonString, err := json.Marshal(ev.Data)
+	if err != nil {
+		dataSizeBytes := len(jsonString)
+		// Log some data about large events so that we can diagnose where they
+		// are coming from.
+		if dataSizeBytes > 50000 {
+			log := r.iopLogger.Info()
+			var serviceName string
+			var spanName string
+
+			if svcName, ok := ev.Data["service.name"]; ok {
+				serviceName = svcName.(string)
+			}
+			if spnName, ok := ev.Data["name"]; ok {
+				spanName = spnName.(string)
+			}
+			log.WithString("service_name", serviceName).
+				WithString("span_name", spanName).
+				Logf("large event detected")
+		}
+	}
 
 	// extract trace ID, route to self or peer, pass on to collector
 	// TODO make trace ID field configurable
@@ -432,7 +455,6 @@ func (r *Router) processEvent(ev *types.Event, reqID interface{}) error {
 	}
 
 	// we're supposed to handle it
-	var err error
 	span := &types.Span{
 		Event:   *ev,
 		TraceID: traceID,
